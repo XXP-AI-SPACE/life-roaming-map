@@ -1,0 +1,73 @@
+.page {
+  min-height: 100vh;
+}
+
+.photo-box {
+  position: relative;
+  width: 100%;
+  height: 620rpx;
+  background: #EFE8DA;
+}
+.photo {
+  width: 100%;
+  height: 100%;
+}
+.photo-hint {
+  position: absolute;
+  right: 20rpx;
+  bottom: 20rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 20rpx;
+  background: rgba(44, 40, 34, 0.45);
+  color: #FFF9F2;
+  font-size: 20rpx;
+}
+
+.body {
+  padding: 36rpx 36rpx 0;
+}
+.title {
+  font-size: 42rpx;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #2C2822;
+}
+.meta {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: #9A8F80;
+}
+.dot {
+  margin: 0 10rpx;
+  color: #CFC4B1;
+}
+.note {
+  margin-top: 28rpx;
+  font-size: 29rpx;
+  line-height: 1.8;
+  color: #4A4238;
+  white-space: pre-wrap;
+}
+
+.danger {
+  margin: 80rpx 36rpx 0;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  border-radius: 44rpx;
+  border: 1rpx solid #E6D6C8;
+  color: #A8623A;
+  font-size: 27rpx;
+  background: #FDFBF6;
+}
+
+.loading {
+  padding-top: 200rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: #B3A791;
+}
+
+.empty-btn {
+  margin: 40rpx 60rpx 0;
+}

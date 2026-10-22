@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>人生漫游地图 · 框架与落地方案 v1</title>
+<style>
+  :root{
+    --paper:#F7F4EE; --card:#FFFDF9; --ink:#2C2822; --ink2:#4A4238;
+    --muted:#8C8275; --muted2:#A79C8D; --line:#E7DECE;
+    --accent:#A8623A; --accent2:#C98A5E; --lit:#D79E58;
+    --sage:#5F7362; --ochre:#B98A3E; --slate:#5B6B7A; --plum:#7A5A62;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased; line-height:1.75;
+  }
+  .wrap{max-width:980px; margin:0 auto; padding:56px 40px 96px;}
+  @media (max-width:640px){ .wrap{padding:28px 18px 64px;} }
+
+  /* 封面 */
+  .cover{border-bottom:1px solid var(--line); padding-bottom:34px; margin-bottom:40px;}
+  .kicker{font-size:11px; letter-spacing:3px; color:var(--accent); text-transform:uppercase;}
+  h1{font-size:38px; line-height:1.3; margin:14px 0 10px; letter-spacing:.5px; font-weight:600;}
+  .sub{font-size:15px; color:var(--muted); max-width:760px;}
+  .meta{display:flex; flex-wrap:wrap; gap:26px; margin-top:26px; font-size:12px; color:var(--muted2);}
+  .meta b{display:block; color:var(--ink2); font-size:14px; font-weight:500; margin-top:2px;}
+  @media (max-width:640px){ h1{font-size:27px;} }
+
+  /* 目录 */
+  .toc{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:20px 24px; margin-bottom:44px; display:grid; grid-template-columns:repeat(3,1fr); gap:6px 24px;
+  }
+  .toc a{color:var(--ink2); text-decoration:none; font-size:13px; padding:3px 0; border-bottom:1px dotted transparent;}
+  .toc a:hover{color:var(--accent); border-bottom-color:var(--accent2);}
+  .toc a span{color:var(--muted2); margin-right:8px; font-size:11px;}
+  @media (max-width:720px){ .toc{grid-template-columns:1fr 1fr;} }
+
+  /* 章节 */
+  section{margin-bottom:56px;}
+  h2{
+    font-size:13px; letter-spacing:3px; color:var(--accent); font-weight:600;
+    margin:0 0 18px; padding-bottom:10px; border-bottom:1px solid var(--line);
+  }
+  h3{font-size:19px; margin:34px 0 12px; font-weight:600; letter-spacing:.3px;}
+  h4{font-size:15px; margin:22px 0 8px; font-weight:600; color:var(--ink2);}
+  p{margin:0 0 12px; font-size:14.5px; color:var(--ink2);}
+  ul,ol{margin:0 0 14px; padding-left:22px;}
+  li{font-size:14.5px; color:var(--ink2); margin-bottom:7px;}
+  strong{font-weight:600; color:var(--ink);}
+  code{
+    font-family:"SF Mono",Menlo,Consolas,monospace; font-size:12.5px;
+    background:#F0E9DC; padding:1px 6px; border-radius:4px; color:#7A4B2A;
+  }
+  .lead{
+    font-size:16px; line-height:1.85; color:var(--ink2);
+    background:var(--card); border-left:3px solid var(--accent); border-radius:0 12px 12px 0;
+    padding:18px 22px; margin:0 0 22px;
+  }
+
+  /* 结论卡 */
+  .concl{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:720px){ .concl{grid-template-columns:1fr;} }
+  .cc{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px;}
+  .cc .n{font-size:11px; letter-spacing:2px; color:var(--accent2);}
+  .cc .t{font-size:16px; font-weight:600; margin:6px 0 6px;}
+  .cc .d{font-size:13px; color:var(--muted); line-height:1.7;}
+
+  /* 表格 */
+  .tbl-wrap{overflow-x:auto; margin:14px 0 8px; border:1px solid var(--line); border-radius:12px;}
+  table{border-collapse:collapse; width:100%; min-width:620px; background:var(--card);}
+  th{
+    text-align:left; font-size:11.5px; letter-spacing:1px; color:var(--muted);
+    font-weight:500; padding:11px 14px; border-bottom:1px solid var(--line); white-space:nowrap;
+    background:#FBF7EF;
+  }
+  td{font-size:13px; padding:11px 14px; border-bottom:1px solid #F2EBDD; vertical-align:top; color:var(--ink2);}
+  tr:last-child td{border-bottom:none;}
+  td.y{color:var(--sage); font-weight:600;}
+  td.n{color:#A8615A;}
+  .tag{
+    display:inline-block; font-size:10.5px; padding:1px 8px; border-radius:10px;
+    background:#F2E7D8; color:#8A5A34; letter-spacing:.5px; white-space:nowrap;
+  }
+  .tag.p0{background:#F7DFD6; color:#9C3F26;}
+  .tag.p1{background:#F6EAD2; color:#8A6420;}
+  .tag.p2{background:#EAEBE2; color:#5E6A55;}
+
+  /* 图 */
+  figure{margin:20px 0 26px;}
+  figure svg{width:100%; height:auto; display:block;}
+  figcaption{font-size:11.5px; color:var(--muted2); text-align:center; margin-top:10px; letter-spacing:.5px;}
+
+  /* 代码块 */
+  pre{
+    background:#2C2822; color:#EFE7D8; border-radius:12px; padding:16px 18px;
+    font-family:"SF Mono",Menlo,Consolas,monospace; font-size:12px; line-height:1.75;
+    overflow-x:auto; margin:14px 0 18px;
+  }
+  pre .c{color:#A79C8D;}
+  pre .k{color:#E0A96D;}
+  pre .s{color:#B7C9A8;}
+
+  /* 清单 */
+  .check{list-style:none; padding-left:0;}
+  .check li{padding-left:24px; position:relative;}
+  .check li:before{
+    content:"·"; position:absolute; left:8px; top:-2px; color:var(--accent); font-size:20px;
+  }
+  .note{
+    background:#FBF6EC; border:1px solid #EADFCB; border-radius:12px;
+    padding:14px 18px; font-size:13px; color:#6B5B49; margin:16px 0;
+  }
+  .note b{color:#8A5A34;}
+  .foot{border-top:1px solid var(--line); margin-top:60px; padding-top:20px; font-size:12px; color:var(--muted2); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="cover">
+    <div class="kicker">Product Framework · v1</div>
+    <h1>人生漫游地图<br>框架与落地方案</h1>
+    <div class="sub">把一个空的腾讯云 Agent-UI 模板，收成一条能跑通的产品线：静态自绘中国地图 + 一次一张照片的记录，配套小程序代码、H5 体验版、方案与思维导图。</div>
+    <div class="meta">
+      <div>日期<b>2026-10-18</b></div>
+      <div>工程<b><project-root></b></div>
+      <div>AppID<b>YOUR_APPID</b></div>
+      <div>形态<b>原生小程序 + 云开发</b></div>
+      <div>阶段<b>MVP 代码可跑 / 待真机</b></div>
+    </div>
+  </div>
+
+  <nav class="toc">
+    <a href="#s1"><span>01</span>结论先行</a>
+    <a href="#s2"><span>02</span>现状盘点</a>
+    <a href="#s3"><span>03</span>产品定义</a>
+    <a href="#s4"><span>04</span>信息架构与流程</a>
+    <a href="#s5"><span>05</span>地图方案（含合规）</a>
+    <a href="#s6"><span>06</span>数据模型与云开发</a>
+    <a href="#s7"><span>07</span>页面与交互</a>
+    <a href="#s8"><span>08</span>技术选型对比</a>
+    <a href="#s9"><span>09</span>设计启示</a>
+    <a href="#s10"><span>10</span>决策日志</a>
+    <a href="#s11"><span>11</span>存疑清单</a>
+    <a href="#s12"><span>12</span>交付与下一步</a>
+  </nav>
+
+  <!-- 01 -->
+  <section id="s1">
+    <h2>01 · 结论先行</h2>
+    <p class="lead">这个项目最容易被做错的地方，是把「地图」当成底图来做：接一个地图 SDK、拿定位、打点。但在个人主体、零预算、只给自己看的前提下，正确解法是反过来的——<strong>地图只是索引，不是地理信息产品</strong>。一张 59KB 的自绘中国地图，加上「省市区 + 一张照片 + 一句话」的记录模型，就能把产品的核心价值交付完。</p>
+
+    <div class="concl">
+      <div class="cc">
+        <div class="n">结论 1</div>
+        <div class="t">地图自绘，不接 SDK</div>
+        <div class="d">省界数据来自标准地图数据源，简化后 59KB，离线可画、零 key、零额度、零审图风险。代价是没有缩放与街道级细节——而 MVP 根本不需要。</div>
+      </div>
+      <div class="cc">
+        <div class="n">结论 2</div>
+        <div class="t">点位精确到「省/市/区」，不到坐标</div>
+        <div class="d">个人主体没有 <code>wx.getLocation</code> 权限，也不需要。手动三级选择器是唯一解，且比精确定位更符合「回忆」这件事的粒度。</div>
+      </div>
+      <div class="cc">
+        <div class="n">结论 3</div>
+        <div class="t">一次只存一张照片</div>
+        <div class="d">限制是产品力：30 秒记完一段。多图相册会把产品拖进「整理照片」的重活里，而那正是用户想逃离的事。</div>
+      </div>
+      <div class="cc">
+        <div class="n">结论 4</div>
+        <div class="t">点亮比列表更有驱动力</div>
+        <div class="d">34 个省级行政区天然是一个进度条。地图的颜色变化比「共 N 条记录」更能让人想再记一条。</div>
+      </div>
+    </div>
+
+    <h3>本次实际交付了什么</h3>
+    <ul>
+      <li><strong>小程序代码</strong>：新增 4 个页面（地图 / 足迹 / 新增 / 详情）+ 3 个工具模块，入口改为地图页，云开发集合与存储链路打通（静态校验全绿）。</li>
+      <li><strong>地图数据</strong>：从 582KB 的 GeoJSON 压到 59KB 的 SVG path，35 个区域（含台湾省、香港、澳门、南海诸岛），中文标签位置逐个校过。</li>
+      <li><strong>H5 体验版</strong>：单文件 141KB，浏览器直接打开就能完整走一遍「点省份 → 记一段 → 足迹 → 详情 → 删除」，localStorage 持久化，22 项端到端断言全部通过。</li>
+      <li><strong>方案与思维导图</strong>：即本文档 + 一张全日成果导图，含 12 条决策日志与 11 项存疑清单。</li>
+    </ul>
+  </section>
+
+  <!-- 02 -->
+  <section id="s2">
+    <h2>02 · 现状盘点</h2>
+    <p>打开 <code><project-root></code> 时，里面其实是一个<strong>腾讯云 Agent-UI 对话模板</strong>：能聊天、能传文件、有天气/美食/地图卡片示例，但跟「人生漫游地图」这个产品没有一行关系。README 是空的，没有任何 PRD 或设计稿。</p>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:30%">路径</th><th style="width:38%">原本是什么</th><th>本次处理</th></tr></thead>
+        <tbody>
+          <tr><td><code>miniprogram/app.js</code></td><td>云开发初始化，写死 env</td><td>改为读 <code>config.js</code>，换环境只改一处</td></tr>
+          <tr><td><code>miniprogram/app.json</code></td><td>3 个模板页，标题「腾讯云开发Agent-UI」</td><td>入口改为 <code>pages/map/map</code>，加双 Tab，标题改「人生漫游地图」</td></tr>
+          <tr><td><code>pages/index</code></td><td>组件文档长页</td><td>保留，不再作为入口（可删）</td></tr>
+          <tr><td><code>pages/chatBot</code></td><td>Agent 对话页（绑定 botId）</td><td>保留，未来可接「AI 行程助手」</td></tr>
+          <tr><td><code>pages/foodBuy</code></td><td>模板示例页</td><td>保留未用（建议删除）</td></tr>
+          <tr><td><code>components/agent-ui</code></td><td>完整对话组件（md5、markdown、文件上传）</td><td>保留未用，约占包体 300KB</td></tr>
+          <tr><td><code>components/toolCard/*</code></td><td>天气 / 美食 / 商户 / 地图卡片</td><td>保留未用</td></tr>
+          <tr><td><code>README.md</code></td><td>空文件（0 字节）</td><td>建议补：运行前置条件与集合建表说明</td></tr>
+          <tr><td><code>uploadCloudFunction.sh</code></td><td>云函数部署脚本</td><td>未使用（本 MVP 不需要云函数）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note"><b>判断：</b>模板代码不是资产，是负重。它给了一个能跑通的云开发环境与 appid，这是唯一的价值；其余 90% 的代码与产品无关。本次没有删除它们，因为「AI 行程助手」仍是一条合理的 Phase 2 路线——但要在提审前做一次减包决策（见存疑 P2-9）。</div>
+
+    <h3>本次新增的文件</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:34%">文件</th><th style="width:16%">体积</th><th>职责</th></tr></thead>
+        <tbody>
+          <tr><td><code>utils/china-map.js</code></td><td>59.0 KB</td><td>35 个区域的 SVG path + 标签坐标（生成物，勿手改）</td></tr>
+          <tr><td><code>utils/map-core.js</code></td><td>6.4 KB</td><td>路径解析、Canvas 绘制、射线法命中测试、省名归一化</td></tr>
+          <tr><td><code>utils/db.js</code></td><td>2.3 KB</td><td>集合读写、照片上传/删除、错误翻译成人话</td></tr>
+          <tr><td><code>config.js</code></td><td>0.4 KB</td><td>环境 ID / 集合名 / 存储目录</td></tr>
+          <tr><td><code>pages/map/*</code></td><td>4 文件</td><td>地图首页：Canvas 自绘 + 省份弹层 + 悬浮记录按钮</td></tr>
+          <tr><td><code>pages/album/*</code></td><td>4 文件</td><td>足迹：按月分组的时间线</td></tr>
+          <tr><td><code>pages/add/*</code></td><td>4 文件</td><td>新增：照片、省市区、日期、标题、备注</td></tr>
+          <tr><td><code>pages/detail/*</code></td><td>4 文件</td><td>详情：大图预览、删除（连带删云存储文件）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section id="s3">
+    <h2>03 · 产品定义</h2>
+    <p class="lead">把你走过的省、拍下的那一张照片，钉在一张中国地图上。不是旅行攻略，不是打卡社交，是一份只有自己能看的空间记忆。</p>
+
+    <h3>为谁做</h3>
+    <p>先是一个人：<strong>你自己</strong>。个人主体、无营业执照、不打算做多用户运营。这个前提决定了后面所有取舍——没有公开主页、没有关注/评论、没有邀请裂变，也就不需要内容审核、举报入口、用户协议之外的合规设计。</p>
+
+    <h3>三个真实场景</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:22%">场景</th><th style="width:30%">触发时刻</th><th>产品要做什么</th></tr></thead>
+        <tbody>
+          <tr><td>回来那天</td><td>旅行结束、照片还在相册里没整理</td><td>30 秒记一条：选地点、选一张、写一句话，结束</td></tr>
+          <tr><td>无聊翻看</td><td>深夜、通勤、等人</td><td>打开地图，看哪块亮着，点进去看那天的照片</td></tr>
+          <tr><td>计划下一次</td><td>看到别人去了某地、或想「还差几个省」</td><td>一眼看出空白区域，形成「想去」的冲动</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>明确不做的事</h3>
+    <ul class="check">
+      <li><strong>不做定位打卡</strong>——个人主体无 <code>wx.getLocation</code>，也不值得为此申请企业资质。</li>
+      <li><strong>不做路线规划</strong>——那是地图 App 的事，不是记忆产品的事。</li>
+      <li><strong>不做多图相册</strong>——一张照片是「一段记忆」的隐喻，多了就变成相册管理。</li>
+      <li><strong>不做社交</strong>——Phase 2 再议，且必须是不公开的（只分享单条记忆卡片）。</li>
+      <li><strong>不做城市级热力图/统计报告</strong>——MVP 阶段的数据量撑不起，也容易变成装饰。</li>
+    </ul>
+
+    <h3>成功的样子（MVP 验收标准）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:26%">指标</th><th style="width:20%">目标</th><th>怎么算</th></tr></thead>
+        <tbody>
+          <tr><td>记一条的耗时</td><td>≤ 30 秒</td><td>从点「记录」到保存成功，含选照片</td></tr>
+          <tr><td>首次可用</td><td>≤ 3 步</td><td>打开 → 点省份 → 记录</td></tr>
+          <tr><td>地图可读性</td><td>一眼认出 5 个点亮省</td><td>真机 375px 宽度下，不看文字也能分辨</td></tr>
+          <tr><td>数据不丢</td><td>换设备可恢复</td><td>云开发同 openid 拉取历史记录</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 04 -->
+  <section id="s4">
+    <h2>04 · 信息架构与流程</h2>
+    <p>只有两个一级入口：<strong>地图</strong>和<strong>足迹</strong>。同一个数据，两种看法——空间视角与时间视角。新增是动作，不是页面层级，所以做成悬浮按钮而不是第三个 Tab。</p>
+
+    <figure>
+      <svg viewBox="0 0 900 372" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#C4B7A2"/>
+          </marker>
+        </defs>
+
+        <!-- 根 -->
+        <rect x="330" y="14" width="240" height="56" rx="13" fill="#2C2822"/>
+        <text x="450" y="39" text-anchor="middle" font-size="14" fill="#FFF9F2" font-weight="600">人生漫游地图</text>
+        <text x="450" y="56" text-anchor="middle" font-size="10.5" fill="#C9BFAD">两个 Tab，一份数据</text>
+
+        <!-- 一级 -->
+        <path d="M400,70 C400,96 300,96 220,116" stroke="#C4B7A2" stroke-width="1.2" fill="none" marker-end="url(#ar)"/>
+        <path d="M500,70 C500,96 560,96 640,116" stroke="#C4B7A2" stroke-width="1.2" fill="none" marker-end="url(#ar)"/>
+
+        <rect x="100" y="122" width="240" height="52" rx="11" fill="#FFFDF9" stroke="#E0D3BF"/>
+        <text x="220" y="146" text-anchor="middle" font-size="13" fill="#2C2822" font-weight="600">地图（首页）</text>
+        <text x="220" y="163" text-anchor="middle" font-size="10.5" fill="#9A8F80">中国地图 · 已点亮 X 省</text>
+
+        <rect x="520" y="122" width="240" height="52" rx="11" fill="#FFFDF9" stroke="#E0D3BF"/>
+        <text x="640" y="146" text-anchor="middle" font-size="13" fill="#2C2822" font-weight="600">足迹（Tab 2）</text>
+        <text x="640" y="163" text-anchor="middle" font-size="10.5" fill="#9A8F80">按月分组的时间线</text>
+
+        <!-- 二级连线 -->
+        <path d="M220,174 V200 H110 V236" stroke="#C4B7A2" stroke-width="1.2" fill="none" marker-end="url(#ar)"/>
+        <path d="M220,174 V200 H570 V236" stroke="#C4B7A2" stroke-width="1.2" fill="none" marker-end="url(#ar)"/>
+        <path d="M640,174 V236" stroke="#C4B7A2" stroke-width="1.2" fill="none" marker-end="url(#ar)"/>
+
+        <rect x="20" y="240" width="180" height="54" rx="11" fill="#FBF2E6" stroke="#E6CFB4"/>
+        <text x="110" y="264" text-anchor="middle" font-size="12.5" fill="#8A5A34" font-weight="600">新增记录</text>
+        <text x="110" y="281" text-anchor="middle" font-size="10.5" fill="#A79C8D">照片 / 省市区 / 日期 / 标题</text>
+
+        <rect x="470" y="240" width="200" height="54" rx="11" fill="#FBF2E6" stroke="#E6CFB4"/>
+        <text x="570" y="264" text-anchor="middle" font-size="12.5" fill="#8A5A34" font-weight="600">记录详情</text>
+        <text x="570" y="281" text-anchor="middle" font-size="10.5" fill="#A79C8D">大图 · 地点 · 日期 · 删除</text>
+
+        <text x="450" y="330" text-anchor="middle" font-size="10.5" fill="#B3A791">保存成功后返回地图，着色与统计自动刷新</text>
+        <text x="450" y="350" text-anchor="middle" font-size="10.5" fill="#B3A791">从省份弹层进入新增时，该省会被预填</text>
+      </svg>
+      <figcaption>信息架构：两个视角，一个动作</figcaption>
+    </figure>
+
+    <h3>主路径走查</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:8%">步</th><th style="width:24%">动作</th><th style="width:30%">系统反馈</th><th>失败/空态</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>打开小程序</td><td>地图铺满，未点亮为米色；标题下方显示「已点亮 0 个省份」</td><td>集合不存在 → toast 说明怎么建</td></tr>
+          <tr><td>2</td><td>点「广东」</td><td>广东变深赭色，底部弹层出现「广东省 / 这里的空白，等你来填」</td><td>点到海上 → 无反应（不误触）</td></tr>
+          <tr><td>3</td><td>点「在这里记录」</td><td>新增页滑出，省份已预填「广东省」</td><td>—</td></tr>
+          <tr><td>4</td><td>选一张照片</td><td>压缩后填入 4:3 相框，右下角「重选」</td><td>取消选择 → 保持原样</td></tr>
+          <tr><td>5</td><td>选城市/区县、写标题</td><td>保存按钮由灰转赭</td><td>缺任一项 → toast 提示缺什么</td></tr>
+          <tr><td>6</td><td>点「记下这一段」</td><td>「已记下」→ 返回地图，广东保持点亮，统计 +1</td><td>上传失败 → 弹窗说明，表单不丢</td></tr>
+          <tr><td>7</td><td>切「足迹」</td><td>本月分组下出现新卡片</td><td>无记录 → 空态 + 去地图</td></tr>
+          <tr><td>8</td><td>点卡片 → 删除</td><td>二次确认后，DB 与云存储文件一起删，地图取消点亮</td><td>删除失败 → 弹窗，记录保留</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 05 -->
+  <section id="s5">
+    <h2>05 · 地图方案（含合规）</h2>
+    <p class="lead">地图是这个产品唯一的「重资产」，也是最容易踩合规线的地方。本次选择<strong>自绘 + 标准地图数据源</strong>，并用一条可复现的脚本把 582KB 的 GeoJSON 压到 59KB。</p>
+
+    <h3>四种地图路线对比</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:20%">方案</th><th style="width:14%">包体/成本</th><th style="width:22%">能力</th><th style="width:22%">风险</th><th>结论</th></tr></thead>
+        <tbody>
+          <tr><td>自绘 SVG / Canvas</td><td>59KB，零 key</td><td>省份着色、点选、离线可画</td><td>无缩放/街道；边界需注明来源</td><td class="y">✅ MVP 采用</td></tr>
+          <tr><td>微信 <code>&lt;map&gt;</code> 组件</td><td>零包体，需网络</td><td>真地图、可叠 polygon</td><td>瓦片加载慢、省份着色需自绘 polygon、样式受限</td><td>备选（做「到访点」时）</td></tr>
+          <tr><td>腾讯地图 GL / JS SDK</td><td>需 key、有额度</td><td>最强：检索、路线、聚合</td><td>个人主体申请与配额、key 泄露</td><td>Phase 2</td></tr>
+          <tr><td>地图图片 + 热区</td><td>图片体积大</td><td>只能点击，不能着色</td><td>分辨率与热区坐标难维护</td><td class="n">否</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>数据管线（可复现）</h3>
+    <figure>
+      <svg viewBox="0 0 900 190" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="ar2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#C4B7A2"/>
+          </marker>
+        </defs>
+        <g font-family="sans-serif">
+          <rect x="8" y="46" width="150" height="74" rx="10" fill="#FFFDF9" stroke="#E0D3BF"/>
+          <text x="83" y="72" text-anchor="middle" font-size="12" fill="#2C2822" font-weight="600">DataV GeoAtlas</text>
+          <text x="83" y="90" text-anchor="middle" font-size="10" fill="#9A8F80">100000_full.json</text>
+          <text x="83" y="106" text-anchor="middle" font-size="10" fill="#B3A791">582 KB · 35 区域</text>
+
+          <path d="M162 83 L196 83" stroke="#C4B7A2" stroke-width="1.2" marker-end="url(#ar2)"/>
+          <rect x="200" y="46" width="150" height="74" rx="10" fill="#FFFDF9" stroke="#E0D3BF"/>
+          <text x="275" y="72" text-anchor="middle" font-size="12" fill="#2C2822" font-weight="600">投影</text>
+          <text x="275" y="90" text-anchor="middle" font-size="10" fill="#9A8F80">Web Mercator</text>
+          <text x="275" y="106" text-anchor="middle" font-size="10" fill="#B3A791">角度当量 · y 轴向下</text>
+
+          <path d="M354 83 L388 83" stroke="#C4B7A2" stroke-width="1.2" marker-end="url(#ar2)"/>
+          <rect x="392" y="46" width="170" height="74" rx="10" fill="#FFFDF9" stroke="#E0D3BF"/>
+          <text x="477" y="72" text-anchor="middle" font-size="12" fill="#2C2822" font-weight="600">简化</text>
+          <text x="477" y="90" text-anchor="middle" font-size="10" fill="#9A8F80">0.1° 取整 + DP 0.08°</text>
+          <text x="477" y="106" text-anchor="middle" font-size="10" fill="#B3A791">敏感区 0.02° + 0.01°</text>
+
+          <path d="M566 83 L600 83" stroke="#C4B7A2" stroke-width="1.2" marker-end="url(#ar2)"/>
+          <rect x="604" y="46" width="150" height="74" rx="10" fill="#FFFDF9" stroke="#E0D3BF"/>
+          <text x="679" y="72" text-anchor="middle" font-size="12" fill="#2C2822" font-weight="600">路径化 + 标签</text>
+          <text x="679" y="90" text-anchor="middle" font-size="10" fill="#9A8F80">M/L/Z · 11 处坐标覆写</text>
+          <text x="679" y="106" text-anchor="middle" font-size="10" fill="#B3A791">1000 × 979 viewBox</text>
+
+          <path d="M758 83 L792 83" stroke="#C4B7A2" stroke-width="1.2" marker-end="url(#ar2)"/>
+          <rect x="796" y="46" width="96" height="74" rx="10" fill="#FBF2E6" stroke="#E6CFB4"/>
+          <text x="844" y="72" text-anchor="middle" font-size="12" fill="#8A5A34" font-weight="600">59 KB</text>
+          <text x="844" y="90" text-anchor="middle" font-size="10" fill="#9A8F80">china-map.js</text>
+          <text x="844" y="106" text-anchor="middle" font-size="10" fill="#B3A791">小程序 + H5 共用</text>
+
+          <text x="450" y="160" text-anchor="middle" font-size="10.5" fill="#B3A791">脚本：.workbuddy/convert_map.py　数据源可换、简化参数可调，其余全自动</text>
+        </g>
+      </svg>
+      <figcaption>从 582KB GeoJSON 到 59KB 路径数据</figcaption>
+    </figure>
+
+    <h3>地图规格</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:24%">项</th><th>值</th></tr></thead>
+        <tbody>
+          <tr><td>区域数</td><td>35 = 34 个省级行政区 + 南海诸岛</td></tr>
+          <tr><td>viewBox</td><td><code>0 0 1000 979</code>（含南海诸岛的真实相对位置，不做内嵌小窗）</td></tr>
+          <tr><td>投影</td><td>Web Mercator，纬度转角度当量后与经度同量纲，保证宽高比不失真</td></tr>
+          <tr><td>简化策略</td><td>常规省份 0.1° 取整 + Douglas-Peucker 0.08°；台湾 / 港澳 / 南海诸岛 0.02° + 0.01° 且不过滤小面</td></tr>
+          <tr><td>体积</td><td>59.0 KB（其中路径字符 56,764）</td></tr>
+          <tr><td>标签</td><td>29 个省份文字 + 5 个直辖市/特区「圆点 + 偏移文字」+ 南海诸岛</td></tr>
+          <tr><td>命中测试</td><td>射线法点在多边形内；直辖市/特区优先（被邻省外环包住），再加 30 单位半径兜底</td></tr>
+          <tr><td>绘制顺序</td><td>常规省份 → 直辖市/特区 → 南海诸岛（避免被邻省填充覆盖）</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>合规要点（必须遵守）</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:26%">要求</th><th>本项目怎么做的</th></tr></thead>
+        <tbody>
+          <tr><td>数据源合规</td><td>只用 DataV.GeoAtlas（源自自然资源部标准地图数据），不接 Google / Apple / Bing / OpenStreetMap / Mapbox</td></tr>
+          <tr><td>领土完整</td><td>台湾省、香港特别行政区、澳门特别行政区均为独立可点区域；南海诸岛按数据源形态完整绘制</td></tr>
+          <tr><td>不自行编造边界</td><td>十段线不在数据源中，因此<strong>不手绘</strong>；只渲染数据源给出的 10 组岛礁多边形，避免「画错」风险</td></tr>
+          <tr><td>不涉及敏感位置</td><td>不采集坐标、不标注军事/涉密单位，记录只到区县一级</td></tr>
+          <tr><td>个人信息</td><td>照片与地点只存自己的云环境，集合权限「仅创建者可读写」，无公开页、无批量导出</td></tr>
+          <tr><td>来源标注</td><td>地图页脚注「地图数据：DataV.GeoAtlas」，正式提审时在「关于」补完整来源说明</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><b>一条硬提醒：</b>自绘边界图<strong>不等于</strong>「标准地图」。如果将来把它印在包装、宣传物料上，或对外宣称是行政区划图，就进入《地图管理条例》的审核范围。MVP 只在小程序内做「个人足迹示意」，并按上表标注来源——这是边界，别越。</div>
+  </section>
+
+  <!-- 06 -->
+  <section id="s6">
+    <h2>06 · 数据模型与云开发</h2>
+    <p>一个集合、一个存储目录，够用。没有用户表——云开发会自动给每条记录写 <code>_openid</code>，配合「仅创建者可读写」的集合权限，隔离是免费的。</p>
+
+    <h3>集合 <code>memories</code></h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:18%">字段</th><th style="width:12%">类型</th><th style="width:12%">必填</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>_id</code></td><td>string</td><td>自动</td><td>云开发主键</td></tr>
+          <tr><td><code>_openid</code></td><td>string</td><td>自动</td><td>写入者身份，权限隔离依据</td></tr>
+          <tr><td><code>title</code></td><td>string</td><td>是</td><td>一句话标题，≤ 24 字</td></tr>
+          <tr><td><code>province</code></td><td>string</td><td>是</td><td>省/直辖市/特区全称，取自 <code>picker mode="region"</code></td></tr>
+          <tr><td><code>city</code></td><td>string</td><td>否</td><td>市；直辖市存同名</td></tr>
+          <tr><td><code>district</code></td><td>string</td><td>否</td><td>区县</td></tr>
+          <tr><td><code>date</code></td><td>string</td><td>是</td><td><code>YYYY-MM-DD</code>，用于排序与分组</td></tr>
+          <tr><td><code>note</code></td><td>string</td><td>否</td><td>备注，≤ 200 字</td></tr>
+          <tr><td><code>fileID</code></td><td>string</td><td>是</td><td>云存储文件 ID（<code>cloud://...</code>），直接给 <code>&lt;image&gt;</code> 用</td></tr>
+          <tr><td><code>createdAt</code></td><td>number</td><td>是</td><td>毫秒时间戳，同日期时的次级排序</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>存储与权限</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:26%">项</th><th>设置</th></tr></thead>
+        <tbody>
+          <tr><td>集合权限</td><td>「仅创建者可读写」——控制台 → 数据库 → memories → 权限设置</td></tr>
+          <tr><td>照片路径</td><td><code>memories/{时间戳}-{随机6位}.{ext}</code>，与记录一一对应，删除时同步删文件</td></tr>
+          <tr><td>图片尺寸</td><td>客户端 <code>chooseMedia</code> 已开 <code>sizeType: compressed</code>；实测 900×675 原图约 21KB，压缩后更小</td></tr>
+          <tr><td>查询</td><td><code>orderBy('date','desc')</code> + <code>orderBy('createdAt','desc')</code>，上限 100 条</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>错误翻译（这层很关键）</h3>
+    <p>云开发的报错对普通用户毫无意义。代码里把几个高频错误翻成了可执行的话：</p>
+    <pre><span class="c">// utils/db.js</span>
+-502005  → <span class="s">"数据表还没有创建：请在云开发控制台新建集合 memories，权限选「仅创建者可读写」"</span>
+-502003  → <span class="s">"云数据库权限不足或环境异常，请检查环境 ID 与集合权限"</span>
+timeout  → <span class="s">"网络不太顺畅，请稍后重试"</span></pre>
+    <div class="note"><b>为什么在意这个：</b>这个项目只有你一个人用，出问题时唯一的「客服」就是这条 toast。一句「数据表还没有创建」比 <code>errCode: -502005</code> 省下半小时。</div>
+  </section>
+
+  <!-- 07 -->
+  <section id="s7">
+    <h2>07 · 页面与交互</h2>
+
+    <h3>四个页面</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:16%">页面</th><th style="width:30%">关键实现</th><th>状态与边界</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>地图</strong><br><span style="font-size:11px;color:#A79C8D">pages/map</span></td>
+            <td>Canvas 2D 按 <code>windowWidth - 40</code> 定宽、按 1000:979 定高；dpr 缩放保证高清；<code>bindtouchend</code> 取坐标反算地图单位后命中测试</td>
+            <td>空态：地图下方一句「点一下省份，记下第一段旅程」；加载态文案「正在翻开你的地图…」；集合缺失 → toast</td>
+          </tr>
+          <tr>
+            <td><strong>足迹</strong><br><span style="font-size:11px;color:#A79C8D">pages/album</span></td>
+            <td>按月分组（<code>date.slice(0,7)</code>），卡片 = 168rpx 方图 + 标题 + 地点 + 备注 2 行 + 日期</td>
+            <td>空态：两行说明 + 「去地图看看」；下拉刷新；底部「— 就记到这里 —」</td>
+          </tr>
+          <tr>
+            <td><strong>新增</strong><br><span style="font-size:11px;color:#A79C8D">pages/add</span></td>
+            <td><code>chooseMedia</code>（1 张、压缩）→ 云存储；<code>picker mode="region"</code> 三级选择；日期默认今天；标题 24 字、备注 200 字计数</td>
+            <td>缺照片/地点/标题分别给不同提示；保存中禁用防重复；失败弹窗且表单不丢</td>
+          </tr>
+          <tr>
+            <td><strong>详情</strong><br><span style="font-size:11px;color:#A79C8D">pages/detail</span></td>
+            <td>大图 <code>aspectFill</code> 620rpx，点击 <code>previewImage</code>；删除走二次确认，同时删 DB 与云存储</td>
+            <td>加载「正在翻开…」；找不到 → 空态 + 返回</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>交互上的几个判断</h3>
+    <ul>
+      <li><strong>省份弹层而不是跳页</strong>：点省份先看到「这里有几段记忆」，再决定看不看或加一段。少一次跳转，多一次犹豫的空间。</li>
+      <li><strong>从省份进入新增会预填省</strong>：用户已经表达了「我要记广东」，就不该让他再选一次。实现上用 <code>preset</code> 字段兜住（picker 需要合法三级数组，不能塞半截）。</li>
+      <li><strong>圆点 + 偏移标签处理京津沪港澳</strong>：这 5 个区域在 343px 宽度下只有几像素，直接写地名必然重叠。做法是画点、文字外移、命中区放大到 30 单位。</li>
+      <li><strong>「重选」而不是删除照片</strong>：单图场景下，用户要的是换一张，不是先删再选。</li>
+      <li><strong>保存成功才返回</strong>：先 toast「已记下」再 <code>navigateBack</code>，避免返回后看不到反馈。</li>
+    </ul>
+  </section>
+
+  <!-- 08 -->
+  <section id="s8">
+    <h2>08 · 技术选型对比</h2>
+
+    <h3>存储：云开发 vs 本地 vs 自建</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:22%">方案</th><th style="width:26%">优势</th><th style="width:26%">代价</th><th>结论</th></tr></thead>
+        <tbody>
+          <tr><td>云开发 DB + 存储</td><td>免鉴权（<code>_openid</code> 自动隔离）、免费额度、无需服务器</td><td>冷启动、配额、环境绑定</td><td class="y">✅ 小程序采用</td></tr>
+          <tr><td>本地 Storage</td><td>零成本、离线、秒开</td><td>换设备即丢、10MB 上限</td><td>H5 体验版采用（演示够用）</td></tr>
+          <tr><td>自建后端</td><td>完全可控、可迁移</td><td>个人主体要买服务器、备案、鉴权全自己写</td><td class="n">否</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>渲染：Canvas vs SVG vs 组件</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:20%">端</th><th style="width:24%">选择</th><th>原因</th></tr></thead>
+        <tbody>
+          <tr><td>小程序</td><td>Canvas 2D</td><td>WXML 不支持 <code>&lt;svg&gt;</code>，也没有 Path2D；路径字符串自己解析成 <code>moveTo/lineTo</code> 是最稳的</td></tr>
+          <tr><td>H5 体验版</td><td>内联 SVG</td><td>每个省份是独立 <code>&lt;path&gt;</code>，点击/hover/高亮全靠 CSS，零重绘成本</td></tr>
+          <tr><td>共用</td><td>同一份 path 数据</td><td>两端视觉一致，改边界只改一个文件</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>记录粒度：省 vs 市 vs 坐标</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:16%">粒度</th><th style="width:26%">点亮逻辑</th><th style="width:26%">用户成本</th><th>结论</th></tr></thead>
+        <tbody>
+          <tr><td>省级</td><td>清晰：一个省一个色块</td><td>最低</td><td class="y">✅ 地图着色按省</td></tr>
+          <tr><td>市级</td><td>需要市级边界数据（体积 ×5）</td><td>中</td><td>记录里存市，地图不按市着色</td></tr>
+          <tr><td>坐标</td><td>需要定位权限</td><td>高（个人主体做不到）</td><td class="n">否</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 09 -->
+  <section id="s9">
+    <h2>09 · 设计启示</h2>
+    <p class="lead">做这个 MVP 的过程里，有几条判断可能比代码更值得留下。</p>
+
+    <h3>1. 地图不是底图，是索引</h3>
+    <p>一开始最容易想到的是「接高德/腾讯地图，打点」。但用户打开这个 App 不是为了知道自己在哪，而是为了确认<strong>「我去过那儿」</strong>。索引只需要「可辨认 + 可点击 + 可着色」，不需要街道、不需要缩放。想清楚这一点，59KB 就替代了 3MB 的 SDK。</p>
+
+    <h3>2. 限制是产品力</h3>
+    <p>「一次只能一张照片」看起来是功能缺失，实际是把「整理旅行照片」这件苦活挡在门外。用户要的是 30 秒留下一段记忆，不是第二个相册。凡是会增加记录成本的功能，MVP 阶段一律不做。</p>
+
+    <h3>3. 数据源决定合规上限，不是美化项</h3>
+    <p>台湾、港澳、南海诸岛怎么画，不是设计风格问题，是能不能上线的问题。本次的做法是<strong>「数据源给什么就画什么，绝不自行补线」</strong>：十段线不在数据里，就不手绘；岛礁多边形在数据里，就完整保留。这样即使被问「你这图哪来的」，答案是可追溯的。</p>
+
+    <h3>4. 点亮本身就是进度条</h3>
+    <p>34 个省级行政区是一个天然的完成度系统，比任何「已记录 N 条」都有驱动力。这也解释了为什么地图页的统计是「已点亮 X 个省份」而不是「共有 N 条记录」——前者是目标，后者是账本。</p>
+
+    <h3>5. 双端同构让验证变便宜</h3>
+    <p>小程序没法在无头环境里跑，但地图逻辑是纯 JS。<code>map-core.js</code> 不依赖任何 <code>wx.*</code>，所以能在 Node 里跑单测（35 个区域的标签点必须命中自己）、能在浏览器里真实绘制并截图验证。H5 体验版则把整个交互链路变成可断言的 22 个用例。这套「逻辑层可测、表现层可截」的结构，比「改完发到手机上点点看」快一个数量级。</p>
+  </section>
+
+  <!-- 10 -->
+  <section id="s10">
+    <h2>10 · 决策日志</h2>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:7%">编号</th><th style="width:26%">决策</th><th style="width:34%">理由</th><th>被否掉的替代方案</th></tr></thead>
+        <tbody>
+          <tr><td>D1</td><td>放弃自动定位，手动选省/市/区</td><td>个人主体无 <code>wx.getLocation</code>；且「回忆」的粒度本就不需要坐标</td><td>企业主体申请定位权限</td></tr>
+          <tr><td>D2</td><td>地图自绘，不引任何地图 SDK</td><td>零 key、零额度、离线、包体 59KB；MVP 不需要缩放与街道</td><td>微信 map 组件 / 腾讯 GL JS</td></tr>
+          <tr><td>D3</td><td>地图数据用 DataV.GeoAtlas</td><td>源自标准地图数据、含台湾/港澳/南海诸岛、可脚本化处理</td><td>手绘 SVG（必然走形）/ 截图描摹</td></tr>
+          <tr><td>D4</td><td>南海诸岛按「10 组岛礁多边形」渲染，不补十段线</td><td>数据源没有十段线几何；自绘即编造边界</td><td>手动画十段线（合规风险）</td></tr>
+          <tr><td>D5</td><td>一次只存一张照片</td><td>控制记录成本 ≤ 30 秒；单图是「一段记忆」的隐喻</td><td>九宫格多图</td></tr>
+          <tr><td>D6</td><td>照片进云存储，DB 只存 fileID</td><td>避免单文档 16MB 限制、便于删除与 CDN 加速</td><td>Base64 存 DB</td></tr>
+          <tr><td>D7</td><td>集合权限「仅创建者可读写」</td><td>云开发自动写 <code>_openid</code>，隔离零成本</td><td>自建用户体系</td></tr>
+          <tr><td>D8</td><td>入口改为地图页，模板页保留不删</td><td>不影响现有云环境；AI 对话仍是可行的 Phase 2</td><td>直接删模板页与 agent-ui</td></tr>
+          <tr><td>D9</td><td>省名归一化（内蒙古自治区→内蒙古）</td><td>picker 返回全称、地图用简称，不归一化则点亮失效</td><td>记录里存简称（picker 不给）</td></tr>
+          <tr><td>D10</td><td>5 个直辖市/特区用「圆点 + 偏移标签」</td><td>343px 宽度下直接写地名必然重叠</td><td>不显示名称（找不到北京）</td></tr>
+          <tr><td>D11</td><td>H5 体验版用 localStorage + 图片压缩</td><td>单文件即可演示完整链路，无需部署与后端</td><td>接同一个云环境（需登录态）</td></tr>
+          <tr><td>D12</td><td>tabBar 用纯文字（无图标）</td><td>少两个 81×81 素材，先把主流程跑通</td><td>先画图标再开发</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section id="s11">
+    <h2>11 · 存疑清单</h2>
+    <p>按「会不会挡住真机跑通」排序。P0 不解决，代码跑不起来；P1 影响体验或合规；P2 可以先放着。</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:7%">级别</th><th style="width:24%">问题</th><th style="width:32%">影响</th><th>建议动作</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="tag p0">P0</span></td>
+            <td>云环境 ID 仍是模板环境 <code>YOUR_ENV_ID</code></td>
+            <td>数据会写进模板环境，可能与你其他项目混在一起，也可能随时被清理</td>
+            <td>在云开发控制台建自己的环境，改 <code>miniprogram/config.js</code> 一行即可</td>
+          </tr>
+          <tr>
+            <td><span class="tag p0">P0</span></td>
+            <td>集合 <code>memories</code> 尚未创建</td>
+            <td>首次保存会报 -502005（已有中文提示，但功能不可用）</td>
+            <td>控制台新建集合，权限选「仅创建者可读写」；建议建 3 个索引（date、createdAt）</td>
+          </tr>
+          <tr>
+            <td><span class="tag p0">P0</span></td>
+            <td>类目匹配：个人主体「工具 → 备忘录」是否允许照片上传</td>
+            <td>提审可能被驳回（含图片上传与云存储）</td>
+            <td>提审前查最新类目要求；若不允许，降级为纯文字记录（数据模型已兼容）</td>
+          </tr>
+          <tr>
+            <td><span class="tag p1">P1</span></td>
+            <td>自绘边界不是「审图号」地图</td>
+            <td>若用于宣传物料或对外宣称行政区划图，可能触及地图审核</td>
+            <td>小程序内标注来源；对外物料不使用该图</td>
+          </tr>
+          <tr>
+            <td><span class="tag p1">P1</span></td>
+            <td>云存储免费额度与流量</td>
+            <td>照片虽压过，但长期记录会累积；超出后可能产生费用或写入失败</td>
+            <td>先在控制台看免费额度；给上传失败加更明确的提示</td>
+          </tr>
+          <tr>
+            <td><span class="tag p1">P1</span></td>
+            <td>照片 EXIF 方向（部分安卓竖拍会横过来）</td>
+            <td>详情页大图方向错误，体验硬伤</td>
+            <td>上传前用 canvas 重绘（H5 端已做，小程序端待补）</td>
+          </tr>
+          <tr>
+            <td><span class="tag p1">P1</span></td>
+            <td>列表上限 100 条</td>
+            <td>超过 100 条后老记录不显示，但地图统计仍按 100 条算</td>
+            <td>下一版改分页或按年加载；短期够用</td>
+          </tr>
+          <tr>
+            <td><span class="tag p1">P1</span></td>
+            <td>直辖市/特区命中依赖 30 单位半径兜底</td>
+            <td>343px 宽度下可能误命中邻省（北京/天津、港澳/广东）</td>
+            <td>真机 375/390/414 三档各测 10 次点击，必要时按机型调半径</td>
+          </tr>
+          <tr>
+            <td><span class="tag p2">P2</span></td>
+            <td>tabBar 无图标，视觉偏素</td>
+            <td>不影响功能，影响完成度观感</td>
+            <td>补 2 个 81×81 单色图标（地图 / 列表）</td>
+          </tr>
+          <tr>
+            <td><span class="tag p2">P2</span></td>
+            <td>模板组件 agent-ui 约 300KB 未使用</td>
+            <td>包体浪费、审核时可能被问「AI 对话功能为何未使用」</td>
+            <td>确认不做 AI 后删除；保留则补一句产品说明</td>
+          </tr>
+          <tr>
+            <td><span class="tag p2">P2</span></td>
+            <td>省份全称与简称的映射靠字符串清洗</td>
+            <td>若未来出现新简称（如「内蒙古」写成「内蒙」）会点亮失败</td>
+            <td>把归一化规则收进 <code>map-core.js</code> 并加单测（已有 7 例）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 12 -->
+  <section id="s12">
+    <h2>12 · 交付与下一步</h2>
+
+    <h3>四件交付物</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:38%">文件</th><th style="width:14%">体积</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><code>人生漫游地图_框架与素材方案_v1_2026-10-18.html</code></td><td>本文档</td><td>方案：架构、地图、数据、选型、决策、存疑</td></tr>
+          <tr><td><code>人生漫游地图_全日成果思维导图_2026-10-18.html</code></td><td>—</td><td>一页看完全部成果与依赖关系</td></tr>
+          <tr><td><code>miniprogram/</code></td><td>—</td><td>小程序代码：4 页 + 3 模块 + 地图数据（可直接用微信开发者工具打开）</td></tr>
+          <tr><td><code>人生漫游地图_H5体验版_2026-10-18.html</code></td><td>141 KB</td><td>单文件，双击即用；同一份地图数据与同一套记录模型</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>已验证 / 未验证</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th style="width:30%">项</th><th style="width:16%">结果</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>地图核心逻辑单测</td><td class="y">通过</td><td>35 区域解析、标签点自命中、绘制调用 4,965 次、7 例归一化</td></tr>
+          <tr><td>小程序静态检查</td><td class="y">通过</td><td>9 个 JS 语法、5 个 JSON 合法、16 个页面文件齐全</td></tr>
+          <tr><td>小程序 Canvas 真实渲染</td><td class="y">通过</td><td>在浏览器复跑同一份绘制代码并截图，点亮/选中/标签正常</td></tr>
+          <tr><td>H5 端到端</td><td class="y">通过</td><td>22 项断言：点亮、弹层、新增、压缩、存储、足迹、详情、删除、示例</td></tr>
+          <tr><td>微信开发者工具 / 真机</td><td class="n">未验证</td><td>需你本地打开工程、建集合、换环境后跑一遍</td></tr>
+          <tr><td>提审类目</td><td class="n">未验证</td><td>个人主体 + 照片上传的组合需确认</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>下一步（按顺序）</h3>
+    <ol>
+      <li><strong>换环境 + 建集合</strong>：改 <code>config.js</code> 的 <code>envId</code>，建 <code>memories</code> 集合并设「仅创建者可读写」。这一步不做，其余都白搭。</li>
+      <li><strong>真机跑一遍主路径</strong>：记 3 条（含直辖市、一个特别行政区、一个普通省），看地图着色与标签在真实屏幕上的可读性。</li>
+      <li><strong>决定模板去留</strong>：AI 对话是删是留，直接决定包体和提审说明；建议先留，等 Phase 2 定方向再动。</li>
+      <li><strong>补两个细节</strong>：安卓 EXIF 方向、tabBar 图标。都是 1 小时内的活。</li>
+      <li><strong>再谈 Phase 2</strong>：单条记忆分享卡片（不公开主页）> 年度回顾 > AI 行程助手。顺序不要反过来。</li>
+    </ol>
+  </section>
+
+  <div class="foot">
+    <div>人生漫游地图 · 框架与落地方案 v1 · 2026-10-18</div>
+    <div>地图数据：DataV.GeoAtlas（自然资源部标准地图数据）· 仅作个人足迹示意</div>
+  </div>
+</div>
+</body>
+</html>

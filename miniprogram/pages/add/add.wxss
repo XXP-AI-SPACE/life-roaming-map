@@ -1,0 +1,128 @@
+.page {
+  min-height: 100vh;
+  padding: 24rpx 28rpx 220rpx;
+}
+
+/* 照片 */
+.photo-box {
+  position: relative;
+  width: 100%;
+  height: 460rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+  background: #EFE8DA;
+}
+.photo {
+  width: 100%;
+  height: 100%;
+}
+.photo-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.photo-icon {
+  font-size: 60rpx;
+  color: #C4B7A2;
+  line-height: 1;
+}
+.photo-txt {
+  margin-top: 18rpx;
+  font-size: 28rpx;
+  color: #8C8275;
+}
+.photo-sub {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #B3A791;
+}
+.photo-chip {
+  position: absolute;
+  right: 16rpx;
+  bottom: 16rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 24rpx;
+  background: rgba(44, 40, 34, 0.55);
+  color: #FFF9F2;
+  font-size: 22rpx;
+}
+
+/* 表单 */
+.form {
+  margin-top: 24rpx;
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+.row {
+  display: flex;
+  align-items: center;
+  min-height: 104rpx;
+  padding: 0 28rpx;
+  border-bottom: 1rpx solid #F3ECE0;
+}
+.row:last-child {
+  border-bottom: none;
+}
+.row-k {
+  width: 108rpx;
+  font-size: 27rpx;
+  color: #8C8275;
+  flex-shrink: 0;
+}
+.row-v {
+  flex: 1;
+  font-size: 29rpx;
+  color: #2C2822;
+}
+.row-v.is-empty {
+  color: #C4B7A2;
+}
+.row-arrow {
+  font-size: 32rpx;
+  color: #CFC4B1;
+  margin-left: 8rpx;
+}
+.row-col {
+  display: block;
+  padding: 24rpx 28rpx;
+}
+.title-input {
+  width: 100%;
+  font-size: 30rpx;
+  color: #2C2822;
+}
+.counter {
+  margin-top: 6rpx;
+  text-align: right;
+  font-size: 20rpx;
+  color: #C9BFAD;
+}
+.note-input {
+  width: 100%;
+  min-height: 140rpx;
+  font-size: 27rpx;
+  line-height: 1.7;
+  color: #2C2822;
+}
+.ph {
+  color: #C4B7A2;
+}
+
+.tip {
+  margin: 20rpx 8rpx 0;
+  font-size: 21rpx;
+  color: #B3A791;
+}
+
+/* 底部按钮 */
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 28rpx calc(24rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, #F7F4EE 72%, rgba(247, 244, 238, 0));
+}

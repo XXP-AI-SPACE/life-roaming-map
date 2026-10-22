@@ -1,0 +1,26 @@
+<view class="page" wx:if="{{item}}">
+  <view class="photo-box" bindtap="preview">
+    <image class="photo" src="{{item.fileID}}" mode="aspectFill"></image>
+    <view class="photo-hint">轻点看大图</view>
+  </view>
+
+  <view class="body">
+    <view class="title">{{item.title}}</view>
+    <view class="meta">
+      <text class="place">{{item.place}}</text>
+      <text class="dot">·</text>
+      <text class="date">{{item.date}}</text>
+    </view>
+    <view class="note" wx:if="{{item.note}}">{{item.note}}</view>
+  </view>
+
+  <view class="danger" bindtap="remove">删除这段记忆</view>
+</view>
+
+<view class="empty" wx:elif="{{!loading}}">
+  <view class="empty-title">没找到这段记忆</view>
+  <view class="empty-desc">可能已经被删掉了</view>
+  <view class="btn-primary empty-btn" bindtap="goBack">返回</view>
+</view>
+
+<view class="loading" wx:else>正在翻开…</view>

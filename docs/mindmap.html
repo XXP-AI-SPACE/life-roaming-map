@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>人生漫游地图 · 全日成果思维导图</title>
+<style>
+  :root{
+    --paper:#F7F4EE; --ink:#2C2822; --muted:#8C8275; --muted2:#A79C8D;
+    --line:#E7DECE; --accent:#A8623A;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px; margin:0 auto; padding:48px 32px 80px;}
+  @media (max-width:640px){ .wrap{padding:28px 14px 56px;} }
+
+  .hd{border-bottom:1px solid var(--line); padding-bottom:24px; margin-bottom:26px;}
+  .kicker{font-size:10.5px; letter-spacing:3px; color:var(--accent);}
+  h1{font-size:31px; margin:12px 0 8px; font-weight:600; letter-spacing:.5px;}
+  .sub{font-size:13.5px; color:var(--muted); line-height:1.8;}
+  @media (max-width:640px){ h1{font-size:23px;} }
+
+  .stats{display:flex; flex-wrap:wrap; gap:10px; margin:20px 0 0;}
+  .stat{
+    background:#FFFDF9; border:1px solid var(--line); border-radius:10px;
+    padding:9px 14px; font-size:11.5px; color:var(--muted);
+  }
+  .stat b{display:block; font-size:17px; color:var(--ink); font-weight:600; margin-bottom:1px; letter-spacing:.3px;}
+
+  .canvas{background:#FFFDF9; border:1px solid var(--line); border-radius:16px; padding:18px 8px; overflow:hidden;}
+  .canvas svg{width:100%; height:auto; display:block;}
+
+  .legend{margin-top:22px; display:flex; flex-wrap:wrap; gap:10px;}
+  .pill{
+    font-size:11.5px; color:#6B5B49; background:#FBF2E6;
+    border:1px solid #EBDCC6; border-radius:999px; padding:7px 15px;
+  }
+  .pill b{color:#8A5A34; font-weight:600;}
+  .foot{margin-top:34px; padding-top:16px; border-top:1px solid var(--line); font-size:11px; color:var(--muted2); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <div class="kicker">MIND MAP · 2026-10-18</div>
+    <h1>人生漫游地图 · 全日成果</h1>
+    <div class="sub">从一个空的腾讯云 AI 模板，到一套能跑的地图记忆产品：4 个页面、1 份 59KB 地图数据、1 个可直接打开的 H5、1 份方案。<br>导图按「定位 → 架构 → 实现 → 验证 → 风险 → 下一步」组织，可当交付索引看。</div>
+    <div class="stats">
+      <div class="stat"><b>35</b>地图区域（含台港澳·南海诸岛）</div>
+      <div class="stat"><b>59 KB</b>地图数据（原 582KB）</div>
+      <div class="stat"><b>4</b>小程序页面</div>
+      <div class="stat"><b>22</b>H5 端到端断言</div>
+      <div class="stat"><b>12 / 11</b>决策日志 / 存疑清单</div>
+    </div>
+  </div>
+
+  <div class="canvas" id="canvas"></div>
+
+  <div class="legend">
+    <div class="pill"><b>方案</b> 人生漫游地图_框架与素材方案_v1_2026-10-18.html</div>
+    <div class="pill"><b>思维导图</b> 本文件</div>
+    <div class="pill"><b>代码</b> miniprogram/（4 页 + 3 模块）</div>
+    <div class="pill"><b>可直接用</b> 人生漫游地图_H5体验版_2026-10-18.html（141KB）</div>
+  </div>
+
+  <div class="foot">
+    <div>人生漫游地图 · 全日成果思维导图 · 2026-10-18</div>
+    <div>地图数据：DataV.GeoAtlas（自然资源部标准地图数据）</div>
+  </div>
+</div>
+
+<script>
+const BRANCHES = [
+  {
+    title: '产品定位', color: '#A8623A',
+    leaves: [
+      '个人工具，只给自己看',
+      '地图 + 照片的空间记忆',
+      '一次一张照片，30 秒记完',
+      '不做社交 / 路线 / 定位打卡',
+    ],
+  },
+  {
+    title: '现状盘点', color: '#8C6A4A',
+    leaves: [
+      '原为腾讯云 Agent-UI 模板',
+      '3 个模板页 + 对话组件 300KB',
+      'README 为空，无 PRD / 设计稿',
+      '本次改造：入口 → 地图页',
+    ],
+  },
+  {
+    title: '信息架构', color: '#5F7362',
+    leaves: [
+      '地图（首页）：点亮 + 弹层',
+      '足迹（Tab 2）：按月分组',
+      '新增：动作而非 Tab',
+      '详情：大图 + 删除',
+    ],
+  },
+  {
+    title: '地图方案', color: '#B98A3E',
+    leaves: [
+      '自绘 SVG / Canvas，不接 SDK',
+      '数据源 DataV.GeoAtlas',
+      '35 区域：34 省 + 南海诸岛',
+      '582KB → 59KB（DP 简化）',
+      '11 处标签坐标逐个校过',
+    ],
+  },
+  {
+    title: '数据模型', color: '#5B6B7A',
+    leaves: [
+      '集合 memories（10 字段）',
+      '_openid 自动隔离数据',
+      '照片 → 云存储 fileID',
+      '权限：仅创建者可读写',
+      '错误码翻译成人话',
+    ],
+  },
+  {
+    title: '代码结构', color: '#7A5A62',
+    leaves: [
+      'pages/map · album · add · detail',
+      'utils/china-map.js（数据）',
+      'utils/map-core.js（绘制 + 命中）',
+      'utils/db.js（读写 + 上传）',
+      'config.js（一处换环境）',
+    ],
+  },
+  {
+    title: '双端验证', color: '#6B7F6E',
+    leaves: [
+      '核心单测：35 区域标签自命中',
+      'Canvas 真实渲染截图',
+      'H5 22 项端到端断言全绿',
+      '静态检查：9 JS / 5 JSON / 16 文件',
+      '真机：未验证（待你跑）',
+    ],
+  },
+  {
+    title: '风险与存疑', color: '#9C5F4A',
+    leaves: [
+      'P0 环境 ID 仍是模板环境',
+      'P0 集合 memories 未创建',
+      'P0 类目是否允许照片上传',
+      'P1 自绘地图需标注来源',
+      'P1 安卓 EXIF 方向未处理',
+    ],
+  },
+  {
+    title: '下一步', color: '#4F5D4A',
+    leaves: [
+      '换环境 + 建集合（先做）',
+      '真机记 3 条看可读性',
+      '补 EXIF 方向 / tab 图标',
+      '决定模板页与 AI 对话去留',
+      'Phase 2：单条记忆分享卡片',
+    ],
+  },
+];
+
+const NS = 'http://www.w3.org/2000/svg';
+const W = 860;
+const NODE_H = 40;       // 分支节点高
+const LEAF_H = 27;       // 叶子行高
+const GAP = 20;          // 分支间距
+const ROOT_W = 196, ROOT_H = 70;
+const ROOT_X = 26;
+const BR_X = 300, BR_W = 176;
+const LEAF_X = 512;
+
+let y = 44;
+BRANCHES.forEach(b => {
+  b.height = Math.max(b.leaves.length * LEAF_H, NODE_H);
+  b.top = y;
+  b.cy = y + b.height / 2;
+  y += b.height + GAP;
+});
+const H = Math.max(y + 30, 420);
+const rootCy = H / 2;
+
+const svg = document.createElementNS(NS, 'svg');
+svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+function el(tag, attrs, text) {
+  const n = document.createElementNS(NS, tag);
+  Object.keys(attrs).forEach(k => n.setAttribute(k, attrs[k]));
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+// 背景（极淡的纸纹网格）
+const defs = el('defs', {});
+defs.innerHTML =
+  '<pattern id="grain" width="18" height="18" patternUnits="userSpaceOnUse">' +
+  '<circle cx="1" cy="1" r="0.7" fill="#E9DFCC" opacity="0.55"/></pattern>';
+svg.appendChild(defs);
+svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: 'url(#grain)' }));
+
+// 根节点
+svg.appendChild(el('rect', {
+  x: ROOT_X, y: rootCy - ROOT_H / 2, width: ROOT_W, height: ROOT_H,
+  rx: 16, fill: '#2C2822',
+}));
+svg.appendChild(el('text', {
+  x: ROOT_X + ROOT_W / 2, y: rootCy - 8, 'text-anchor': 'middle',
+  'font-size': 15.5, 'font-weight': 600, fill: '#FFF9F2',
+}, '人生漫游地图'));
+svg.appendChild(el('text', {
+  x: ROOT_X + ROOT_W / 2, y: rootCy + 12, 'text-anchor': 'middle',
+  'font-size': 10.5, fill: '#C9BFAD', 'letter-spacing': '1.5',
+}, 'MVP · 2026-10-18'));
+
+BRANCHES.forEach(b => {
+  // 根 → 分支
+  const x1 = ROOT_X + ROOT_W, y1 = rootCy, x2 = BR_X, y2 = b.cy;
+  const cx = (x1 + x2) / 2;
+  svg.appendChild(el('path', {
+    d: 'M' + x1 + ',' + y1 + ' C' + cx + ',' + y1 + ' ' + cx + ',' + y2 + ' ' + x2 + ',' + y2,
+    fill: 'none', stroke: b.color, 'stroke-width': 1.2, opacity: .55,
+  }));
+
+  // 分支节点
+  svg.appendChild(el('rect', {
+    x: BR_X, y: b.cy - NODE_H / 2, width: BR_W, height: NODE_H,
+    rx: 11, fill: '#FFFDF9', stroke: b.color, 'stroke-width': 1.1,
+  }));
+  svg.appendChild(el('rect', {
+    x: BR_X, y: b.cy - NODE_H / 2, width: 4, height: NODE_H, rx: 2, fill: b.color,
+  }));
+  svg.appendChild(el('text', {
+    x: BR_X + 18, y: b.cy + 1, 'font-size': 13.5, 'font-weight': 600,
+    fill: '#2C2822', 'dominant-baseline': 'middle',
+  }, b.title));
+
+  // 叶子
+  const n = b.leaves.length;
+  const start = b.cy - (n * LEAF_H) / 2 + LEAF_H / 2;
+  b.leaves.forEach((t, i) => {
+    const ly = start + i * LEAF_H;
+    // 分支 → 叶子
+    svg.appendChild(el('path', {
+      d: 'M' + (BR_X + BR_W) + ',' + b.cy + ' C' + (BR_X + BR_W + 14) + ',' + b.cy + ' ' +
+         (LEAF_X - 18) + ',' + ly + ' ' + (LEAF_X - 8) + ',' + ly,
+      fill: 'none', stroke: b.color, 'stroke-width': 0.8, opacity: .35,
+    }));
+    svg.appendChild(el('circle', { cx: LEAF_X - 4, cy: ly, r: 2.4, fill: b.color, opacity: .75 }));
+    svg.appendChild(el('text', {
+      x: LEAF_X + 8, y: ly + 1, 'font-size': 12, fill: '#4A4238',
+      'dominant-baseline': 'middle',
+    }, t));
+  });
+});
+
+document.getElementById('canvas').appendChild(svg);
+</script>
+</body>
+</html>

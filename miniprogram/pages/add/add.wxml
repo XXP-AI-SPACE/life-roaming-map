@@ -1,0 +1,61 @@
+<view class="page">
+  <view class="photo-box" bindtap="choosePhoto">
+    <image wx:if="{{photo}}" class="photo" src="{{photo}}" mode="aspectFill"></image>
+    <view wx:else class="photo-empty">
+      <view class="photo-icon">＋</view>
+      <view class="photo-txt">放一张照片</view>
+      <view class="photo-sub">相册或相机，一张就好</view>
+    </view>
+    <view class="photo-chip" wx:if="{{photo}}">重选</view>
+  </view>
+
+  <view class="form">
+    <picker mode="region" bindchange="onRegionChange" value="{{region}}">
+      <view class="row">
+        <text class="row-k">地点</text>
+        <view class="row-v {{regionText ? '' : 'is-empty'}}">{{regionText || '省 / 市 / 区'}}</view>
+        <text class="row-arrow">›</text>
+      </view>
+    </picker>
+
+    <picker mode="date" value="{{date}}" bindchange="onDateChange">
+      <view class="row">
+        <text class="row-k">日期</text>
+        <view class="row-v">{{date}}</view>
+        <text class="row-arrow">›</text>
+      </view>
+    </picker>
+
+    <view class="row row-col">
+      <input
+        class="title-input"
+        value="{{title}}"
+        maxlength="24"
+        placeholder="一句话记住这里"
+        placeholder-class="ph"
+        bindinput="onTitleInput"
+      />
+      <view class="counter">{{title.length}}/24</view>
+    </view>
+
+    <view class="row row-col">
+      <textarea
+        class="note-input"
+        value="{{note}}"
+        maxlength="200"
+        auto-height
+        placeholder="发生了什么？和谁一起？"
+        placeholder-class="ph"
+        bindinput="onNoteInput"
+      ></textarea>
+    </view>
+  </view>
+
+  <view class="tip">照片会压缩后上传，只有你自己看得见</view>
+
+  <view class="footer">
+    <view class="btn-primary {{canSave && !saving ? '' : 'is-disabled'}}" bindtap="submit">
+      {{saving ? '正在保存…' : '记下这一段'}}
+    </view>
+  </view>
+</view>

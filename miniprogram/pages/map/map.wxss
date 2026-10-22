@@ -1,0 +1,174 @@
+.page {
+  min-height: 100vh;
+  padding-bottom: 180rpx;
+}
+
+/* 地图 */
+.map-wrap {
+  position: relative;
+  margin: 12rpx 20rpx 0;
+  display: flex;
+  justify-content: center;
+}
+.map-canvas {
+  display: block;
+}
+.map-tip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #A79C8D;
+  letter-spacing: 1rpx;
+}
+
+/* 图例 */
+.legend {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 36rpx 0;
+}
+.lg {
+  display: flex;
+  align-items: center;
+  margin-right: 28rpx;
+}
+.dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 10rpx;
+}
+.dot-lit { background: #D79E58; }
+.dot-un { background: #EEE8DC; border: 1rpx solid #DED5C5; }
+.lg-txt { font-size: 22rpx; color: #8C8275; }
+.lg-link {
+  margin-left: auto;
+  font-size: 22rpx;
+  color: #A8623A;
+}
+
+/* 悬浮按钮 */
+.fab {
+  position: fixed;
+  right: 40rpx;
+  bottom: 60rpx;
+  height: 96rpx;
+  padding: 0 34rpx;
+  border-radius: 48rpx;
+  background: #A8623A;
+  box-shadow: 0 10rpx 30rpx rgba(168, 98, 58, 0.35);
+  display: flex;
+  align-items: center;
+  z-index: 20;
+}
+.fab-plus {
+  color: #FFF9F2;
+  font-size: 40rpx;
+  margin-right: 8rpx;
+  line-height: 1;
+}
+.fab-txt {
+  color: #FFF9F2;
+  font-size: 28rpx;
+  letter-spacing: 2rpx;
+}
+
+/* 弹层 */
+.mask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(44, 40, 34, 0.32);
+  z-index: 30;
+}
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #FDFBF6;
+  border-radius: 32rpx 32rpx 0 0;
+  box-shadow: 0 -8rpx 40rpx rgba(60, 45, 30, 0.12);
+  transform: translateY(110%);
+  transition: transform 0.26s ease;
+  z-index: 31;
+  padding-bottom: calc(32rpx + env(safe-area-inset-bottom));
+}
+.sheet-open {
+  transform: translateY(0);
+}
+.sheet-inner {
+  padding: 16rpx 36rpx 8rpx;
+}
+.grip {
+  width: 64rpx;
+  height: 8rpx;
+  border-radius: 4rpx;
+  background: #E2D8C8;
+  margin: 0 auto 20rpx;
+}
+.sheet-hd {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+.sheet-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #2C2822;
+}
+.sheet-sub {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: #9A8F80;
+}
+.sheet-close {
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  text-align: center;
+  color: #A79C8D;
+  font-size: 28rpx;
+}
+.sheet-list {
+  max-height: 460rpx;
+  margin: 12rpx 0 20rpx;
+}
+.rec {
+  display: flex;
+  align-items: center;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid #F1EADD;
+}
+.rec-img {
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 14rpx;
+  background: #EFE8DA;
+  flex-shrink: 0;
+}
+.rec-main {
+  margin-left: 20rpx;
+  min-width: 0;
+}
+.rec-title {
+  font-size: 28rpx;
+  color: #2C2822;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rec-meta {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #A79C8D;
+}
+.sheet-btn {
+  margin-top: 8rpx;
+}

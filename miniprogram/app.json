@@ -1,0 +1,35 @@
+{
+  "pages": [
+    "pages/map/map",
+    "pages/album/album",
+    "pages/add/add",
+    "pages/detail/detail"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#F7F4EE",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "人生漫游地图",
+    "backgroundColor": "#F7F4EE",
+    "backgroundTextStyle": "light",
+    "enablePullDownRefresh": true
+  },
+  "tabBar": {
+    "color": "#9A8F80",
+    "selectedColor": "#A8623A",
+    "backgroundColor": "#FBF8F2",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/map/map", "text": "地图" },
+      { "pagePath": "pages/album/album", "text": "足迹" }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "networkTimeout": {
+    "request": 300000,
+    "connectSocket": 60000,
+    "uploadFile": 60000,
+    "downloadFile": 60000
+  }
+}

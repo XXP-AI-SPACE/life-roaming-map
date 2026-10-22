@@ -1,0 +1,56 @@
+<view class="page">
+  <view class="hd">
+    <view class="hd-title">人生漫游地图</view>
+    <view class="hd-sub" wx:if="{{loaded}}">已点亮 {{litCount}} 个省份 · {{total}} 段记忆</view>
+    <view class="hd-sub" wx:else>正在翻开你的地图…</view>
+  </view>
+
+  <view class="map-wrap">
+    <canvas
+      type="2d"
+      id="chinaMap"
+      class="map-canvas"
+      style="width:{{canvasW}}px;height:{{canvasH}}px"
+      bindtouchend="onMapTap"
+    ></canvas>
+    <view class="map-tip" wx:if="{{loaded && total === 0}}">点一下省份，记下第一段旅程</view>
+  </view>
+
+  <view class="legend">
+    <view class="lg"><view class="dot dot-lit"></view><text class="lg-txt">走过的省份</text></view>
+    <view class="lg"><view class="dot dot-un"></view><text class="lg-txt">还没去过</text></view>
+    <view class="lg-link" bindtap="goAlbum">查看足迹 →</view>
+  </view>
+
+  <view class="fab" bindtap="goAdd">
+    <text class="fab-plus">＋</text>
+    <text class="fab-txt">记录</text>
+  </view>
+
+  <view class="mask" wx:if="{{sheetOpen}}" bindtap="closeSheet" catchtouchmove="noop"></view>
+
+  <view class="sheet {{sheetOpen ? 'sheet-open' : ''}}" catchtouchmove="noop">
+    <view class="sheet-inner" wx:if="{{active}}">
+      <view class="grip"></view>
+      <view class="sheet-hd">
+        <view class="sheet-hd-l">
+          <view class="sheet-title">{{active.name}}</view>
+          <view class="sheet-sub">{{active.count > 0 ? active.count + ' 段记忆' : '这里的空白，等你来填'}}</view>
+        </view>
+        <view class="sheet-close" bindtap="closeSheet">✕</view>
+      </view>
+
+      <scroll-view class="sheet-list" scroll-y wx:if="{{active.list.length}}">
+        <view class="rec" wx:for="{{active.list}}" wx:key="_id" data-id="{{item._id}}" bindtap="goDetail">
+          <image class="rec-img" src="{{item.fileID}}" mode="aspectFill" lazy-load="true"></image>
+          <view class="rec-main">
+            <view class="rec-title">{{item.title}}</view>
+            <view class="rec-meta">{{item.place}}<text wx:if="{{item.place}}"> · </text>{{item.date}}</view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="btn-primary sheet-btn" bindtap="goAddHere">在这里记录</view>
+    </view>
+  </view>
+</view>
